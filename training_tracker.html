@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Progress Tracker</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- React and ReactDOM CDNs -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX transformation in the browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* Ensure the root element takes full height */
+        #root {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Main App Component
+        const App = () => {
+          // State to store the completion status of each item
+          // This will be an object like: { 'week-1-video-0': true, 'week-2-activity-1': false }
+          const [completedItems, setCompletedItems] = React.useState({});
+          // State to manage which week's details are currently expanded
+          const [expandedWeek, setExpandedWeek] = React.useState(null);
+
+          // Load completed items from local storage when the component mounts
+          React.useEffect(() => {
+            try {
+              const savedCompletedItems = localStorage.getItem('trainingProgress');
+              if (savedCompletedItems) {
+                setCompletedItems(JSON.parse(savedCompletedItems));
+              }
+            } catch (error) {
+              console.error("Failed to load progress from localStorage", error);
+              // Fallback to an empty object if loading fails
+              setCompletedItems({});
+            }
+          }, []);
+
+          // Save completed items to local storage whenever they change
+          React.useEffect(() => {
+            try {
+              localStorage.setItem('trainingProgress', JSON.stringify(completedItems));
+            } catch (error) {
+              console.error("Failed to save progress to localStorage", error);
+            }
+          }, [completedItems]);
+
+          // Data structure for the entire training timeline
+          const timelineData = [
+            {
+              week: 1,
+              title: "Intro to AI and Engineering Principles",
+              goals: [
+                "Understand core concepts of Artificial Intelligence and Engineering.",
+                "Explore how engineering principles guide real-world problem-solving.",
+              ],
+              keyConcepts: [
+                "What is AI? (machine learning, automation, ethics)",
+                "Main branches of engineering",
+                "The Engineering Design Process",
+                "Safety and ethics in engineering",
+              ],
+              videos: [
+                {
+                  title: "AI Fundamentals (watch intro + beginner content)",
+                  duration: "2 Hours",
+                  url: "https://www.youtube.com/watch?v=ad790sdP21A", // Placeholder: Replace with actual video URL
+                },
+              ],
+              activities: [
+                "Class discussion: “Where do we see AI in daily life?”",
+                "Group brainstorm: “How do engineers solve problems?”",
+                "Short quiz or reflection sheet",
+                "Engineering principles (slide presentation and/or hand out)",
+              ],
+            },
+            {
+              week: 2,
+              title: "Intro to 3D Printing + Thingiverse Exploration",
+              goals: [
+                "Learn what 3D printing is and how it works.",
+                "Search and prepare a model from Thingiverse.",
+                "Understand slicing software.",
+              ],
+              keyConcepts: [
+                "What is 3D printing?",
+                "STL files & Thingiverse",
+                "Introduction to slicing software (e.g., PrusaSlicer)",
+              ],
+              videos: [
+                {
+                  title: "3D Printing Masterclass",
+                  duration: "2 Hours",
+                  url: "https://www.youtube.com/watch?v=ad790sdP21A", // Placeholder: Replace with actual video URL
+                },
+              ],
+              activities: [
+                "Find a model on Thingiverse.",
+                "Load and slice it in PrusaSlicer.",
+                "PrusaSlicer walkthrough",
+                "Discuss: “What is this model made for? Would PLA be a good choice?”",
+              ],
+            },
+            {
+              week: 3,
+              title: "3D Printing Materials + Basic Fusion 360",
+              goals: [
+                "Learn about 3D printing materials and their properties.",
+                "Begin working in Fusion 360.",
+              ],
+              keyConcepts: [
+                "Materials: PLA, ABS, TPU, PETG, Resin",
+                "Properties: flexibility, strength, temperature resistance",
+                "Intro to Fusion 360: navigation, sketches, extrusion",
+              ],
+              videos: [
+                {
+                  title: "Fusion 360 Beginner Course (first few sections)",
+                  duration: "19 Hours",
+                  url: "https://www.youtube.com/watch?v=ad790sdP21A", // Placeholder: Replace with actual video URL
+                },
+              ],
+              activities: [
+                "Material comparison chart",
+                "Sketch and model a simple object in Fusion 360 (e.g., a keychain or phone stand)",
+              ],
+            },
+            {
+              week: 4,
+              title: "3D Scanning + Fusion 360 Project Work",
+              goals: [
+                "Understand what 3D scanning is and how it's used.",
+                "Continue working on Fusion 360 projects.",
+              ],
+              keyConcepts: [
+                "What is 3D printing", // Note: Original timeline says '3D printing' here, assume it meant 3D scanning contextually
+                "STL vs OBJ",
+                "Reverse engineering from scanned data",
+              ],
+              videos: [
+                {
+                  title: "Artec Leo Tutorial",
+                  duration: "1 Minute",
+                  url: "https://tutorial.sparkxcell.com/tutorials/artec_leo.html",
+                },
+              ],
+              activities: [
+                "Watch a scan demonstration or practice with scanner",
+                "Modify or build a model in Fusion 360 based on scan or idea",
+                "Prepare for export and slicing",
+              ],
+            },
+            {
+              week: 5,
+              title: "Office 365 skills for Engineers and Designers",
+              goals: [
+                "Learn how to use Word, Excel, and PowerPoint in STEM fields.",
+                "Practice documenting design work and data tracking",
+              ],
+              keyConcepts: [
+                "Excel: creating tables and basic formulas",
+                "Word: project documentation, reports",
+                "PowerPoint: presenting a design concept",
+              ],
+              videos: [
+                {
+                  title: "Microsoft 365 Complete Guide",
+                  duration: "9.5 Hours",
+                  url: "https://digitalu.udemy.com/course/microsoft-365/",
+                },
+              ],
+              activities: [
+                "Create a project journal in Word",
+                "Log part dimensions and slicing settings in Excel",
+                "Make a simple presentation showcasing their 3D project",
+              ],
+            },
+            {
+              week: 6,
+              title: "Intro to PowerApps + Final Week",
+              goals: [
+                "Learn how PowerApps can be used for workflow automation and digital tools",
+                "Explore how engineers use custom apps in real-world settings",
+              ],
+              keyConcepts: [
+                "Forms, variables, and workflows in PowerApps",
+                "Connecting PowerApps with Office 365 tools",
+              ],
+              videos: [
+                {
+                  title: "Complete Guide to Microsoft PowerApps",
+                  duration: "9 Hours",
+                  url: "https://digitalu.udemy.com/course/complete-guide-to-microsoft-powerapps-basic-to-advanced/",
+                },
+              ],
+              activities: [
+                "Build a simple PowerApp (example: part tracker or submission form)",
+                "Share final project: explain what they modeled, how they sliced it and what materials they would use.",
+                "Group discussion: what would they design or improve next?",
+              ],
+            },
+          ];
+
+          // Function to handle marking an item as complete
+          const handleMarkComplete = (itemId) => {
+            setCompletedItems((prev) => ({
+              ...prev,
+              [itemId]: !prev[itemId], // Toggle completion status
+            }));
+          };
+
+          // Calculate overall progress for the progress bar
+          const totalItems = timelineData.reduce((acc, week) => {
+            return acc + week.videos.length + week.activities.length;
+          }, 0);
+          const completedCount = Object.values(completedItems).filter(Boolean).length;
+          const progressPercentage = totalItems > 0 ? (completedCount / totalItems) * 100 : 0;
+
+          // Toggle week expansion
+          const toggleWeek = (weekNumber) => {
+            setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
+          };
+
+          return (
+            // Main container with responsive styling
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 font-sans p-4 sm:p-6 lg:p-8">
+              {/* Header */}
+              <header className="mb-8 text-center">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-800 mb-2">
+                  Training Progress Tracker
+                </h1>
+                <p className="text-lg text-gray-600">
+                  Interactive timeline for AI and Engineering students
+                </p>
+              </header>
+
+              {/* Progress Bar */}
+              <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">Overall Progress</h2>
+                <div className="w-full bg-gray-200 rounded-full h-4">
+                  <div
+                    className="bg-blue-500 h-4 rounded-full transition-all duration-500 ease-in-out"
+                    style={{ width: `${progressPercentage}%` }}
+                  ></div>
+                </div>
+                <p className="text-right text-sm text-gray-600 mt-2">
+                  {completedCount} / {totalItems} items completed ({progressPercentage.toFixed(1)}%)
+                </p>
+              </div>
+
+              {/* Timeline Sections */}
+              <div className="max-w-4xl mx-auto space-y-6 pb-8">
+                {timelineData.map((weekData) => (
+                  <div
+                    key={`week-${weekData.week}`}
+                    className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out"
+                  >
+                    {/* Week Header - Clickable to toggle expansion */}
+                    <div
+                      className={`p-6 cursor-pointer flex justify-between items-center ${
+                        expandedWeek === weekData.week ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white hover:bg-blue-600'
+                      } rounded-t-xl`}
+                      onClick={() => toggleWeek(weekData.week)}
+                    >
+                      <h2 className="text-2xl font-bold">Week {weekData.week}: {weekData.title}</h2>
+                      {/* Chevron icon for expansion indicator */}
+                      <svg
+                        className={`w-6 h-6 transform transition-transform duration-300 ${
+                          expandedWeek === weekData.week ? 'rotate-180' : ''
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                      </svg>
+                    </div>
+
+                    {/* Week Content - Conditionally rendered based on expandedWeek state */}
+                    {expandedWeek === weekData.week && (
+                      <div className="p-6 border-t border-gray-200">
+                        {/* Goals */}
+                        <div className="mb-6">
+                          <h3 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path></svg>
+                            Goals
+                          </h3>
+                          <ul className="list-disc list-inside text-gray-800 space-y-1">
+                            {weekData.goals.map((goal, idx) => (
+                              <li key={idx} className="flex items-start">
+                                <span className="flex-shrink-0 mr-2 text-blue-500">•</span>
+                                {goal}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Key Concepts */}
+                        <div className="mb-6">
+                          <h3 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-purple-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd"></path></svg>
+                            Key Concepts
+                          </h3>
+                          <ul className="list-disc list-inside text-gray-800 space-y-1">
+                            {weekData.keyConcepts.map((concept, idx) => (
+                              <li key={idx} className="flex items-start">
+                                <span className="flex-shrink-0 mr-2 text-purple-500">•</span>
+                                {concept}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Videos */}
+                        <div className="mb-6">
+                          <h3 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path><path d="M9 9a1 1 0 000 2h2a1 1 0 100-2H9z"></path></svg>
+                            Videos
+                          </h3>
+                          <div className="space-y-3">
+                            {weekData.videos.map((video, idx) => {
+                              const itemId = `week-${weekData.week}-video-${idx}`;
+                              const isCompleted = completedItems[itemId];
+                              return (
+                                <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-50 rounded-lg shadow-sm">
+                                  <div className="mb-2 sm:mb-0">
+                                    <a
+                                      href={video.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline font-medium text-lg"
+                                    >
+                                      {video.title}
+                                    </a>
+                                    <p className="text-sm text-gray-600">{video.duration}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => handleMarkComplete(itemId)}
+                                    className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out text-sm ${
+                                      isCompleted
+                                        ? 'bg-green-500 text-white cursor-not-allowed opacity-80'
+                                        : 'bg-blue-500 text-white hover:bg-blue-600 shadow-md'
+                                    }`}
+                                    disabled={isCompleted}
+                                  >
+                                    {isCompleted ? 'Watched!' : 'Mark as Watched'}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Activities */}
+                        <div>
+                          <h3 className="text-xl font-semibold text-gray-700 mb-3 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clipRule="evenodd"></path></svg>
+                            Activities
+                          </h3>
+                          <div className="space-y-3">
+                            {weekData.activities.map((activity, idx) => {
+                              const itemId = `week-${weekData.week}-activity-${idx}`;
+                              const isCompleted = completedItems[itemId];
+                              return (
+                                <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-gray-50 rounded-lg shadow-sm">
+                                  <p className="text-gray-800 text-lg mb-2 sm:mb-0">{activity}</p>
+                                  <button
+                                    onClick={() => handleMarkComplete(itemId)}
+                                    className={`px-4 py-2 rounded-full font-medium transition-all duration-200 ease-in-out text-sm ${
+                                      isCompleted
+                                        ? 'bg-green-500 text-white cursor-not-allowed opacity-80'
+                                        : 'bg-yellow-500 text-white hover:bg-yellow-600 shadow-md'
+                                    }`}
+                                    disabled={isCompleted}
+                                  >
+                                    {isCompleted ? 'Done!' : 'Mark as Done'}
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        };
+
+        // Render the App component into the 'root' div
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
